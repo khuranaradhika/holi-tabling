@@ -1,3 +1,5 @@
 .env
 open_ai_key.txt
-collected_emails.csvcollected_email.csv
+collected_emails.csv
+.DS_Store
+__pycache__/
