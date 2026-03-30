@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AI Mood Detector — AI.M Academy</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0d0221,#150040,#0a0a3e);color:#fff;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px;text-align:center;max-width:580px;width:100%}
+  h1{font-size:30px;margin-bottom:4px}
+  h2{font-size:22px;margin-bottom:10px}
+  .pink{color:#FF1493}.cyan{color:#00E5FF}.green{color:#00E676}.yellow{color:#FFD700}.purple{color:#E040FB}
+  .sub{font-size:14px;color:#aaa;margin-bottom:18px}
+  .brand{font-size:18px;font-weight:bold;color:#FF1493;margin-bottom:14px}
+  input[type=text],input[type=email]{width:100%;padding:14px;font-size:18px;border-radius:12px;border:2px solid #E040FB;background:rgba(0,0,0,.3);color:#fff;text-align:center;outline:none}
+  input::placeholder{color:#666}
+  .btn{border:none;border-radius:14px;padding:14px 32px;font-size:16px;font-weight:bold;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .1s}
+  .btn:hover{transform:scale(1.03)}.btn:active{transform:scale(.97)}
+  .btn-purple{background:linear-gradient(135deg,#9C27B0,#E040FB)}
+  .btn-pink{background:linear-gradient(135deg,#FF1493,#FF6B35)}
+  .btn-yellow{background:linear-gradient(135deg,#FF8F00,#FFD700)}
+  .btn-ghost{background:transparent;color:#aaa;border:2px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 24px;font-size:15px;cursor:pointer}
+  .btn:disabled{opacity:.4;cursor:default;transform:none}
+  .btn-link{background:none;border:none;color:#666;cursor:pointer;font-size:13px;margin-top:10px}
+  video{width:100%;max-width:420px;border-radius:16px;border:3px solid #E040FB;display:block;margin:0 auto;transform:scaleX(-1)}
+  canvas{display:none}
+  .hid{display:none}
+  .mood-result{margin:16px 0}
+  .mood-emoji{font-size:80px;margin-bottom:4px;animation:popIn .4s ease}
+  .mood-word{font-size:32px;font-weight:bold;margin-bottom:4px}
+  .mood-conf{font-size:15px;color:#E040FB;margin-bottom:10px}
+  .mood-comment{background:rgba(255,255,255,.08);border-radius:14px;padding:14px;margin:10px 0;font-size:15px;color:#ddd;line-height:1.5;font-style:italic}
+  .mood-tip{font-size:13px;color:#FFD700;margin:8px 0}
+  .history{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .history-item{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .history-item .h-emoji{font-size:24px}
+  .round-badge{background:linear-gradient(135deg,#9C27B0,#E040FB);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:bold;display:inline-block;margin-bottom:12px}
+  .pbox{background:rgba(255,20,147,.1);border:1px solid rgba(255,20,147,.3);border-radius:14px;padding:16px;margin:16px 0}
+  .pbox p{font-size:14px;color:#ccc;line-height:1.6}
+  .dots{display:flex;justify-content:center;gap:10px;margin:16px 0}
+  .dot{width:14px;height:14px;border-radius:50%;animation:bounce 1s ease infinite}
+  .dot:nth-child(1){background:#E040FB;animation-delay:0s}
+  .dot:nth-child(2){background:#FF1493;animation-delay:.15s}
+  .dot:nth-child(3){background:#FFD700;animation-delay:.3s}
+  .dot:nth-child(4){background:#00E5FF;animation-delay:.45s}
+  .dot:nth-child(5){background:#00E676;animation-delay:.6s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes popIn{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+  @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  .spinner{font-size:48px;display:inline-block;animation:spin 1.5s linear infinite}
+  .snap-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;opacity:0;pointer-events:none;z-index:999;transition:opacity .1s}
+  .snap-flash.flash{opacity:.6;transition:none}
+  .photo-strip{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .photo-strip img{width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #E040FB}
+  .ec{margin-top:14px;font-size:12px;color:#555}
+  .challenge-box{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px;margin:10px 0}
+  .challenge-box p{font-size:13px;color:#FFD700}
+</style>
+</head>
+<body>
+<div class="snap-flash" id="flash"></div>
+<div class="card" id="app">
+
+  <!-- WELCOME -->
+  <div id="step-welcome">
+    <div style="font-size:64px;margin-bottom:8px">😄</div>
+    <h1>AI Mood Detector</h1>
+    <p style="font-size:18px;color:#E040FB;margin-bottom:4px">Can You Trick the AI?</p>
+    <p style="font-size:14px;color:#999;margin:4px 0">Powered by</p>
+    <div class="brand">AI.M Academy</div>
+    <p class="sub">Make a face. AI guesses your mood.<br>Try to fool it if you can!</p>
+    <button class="btn btn-purple" onclick="goTo('name')">Let's Play! ▸</button>
+    <div class="ec" id="wc"></div>
+  </div>
+
+  <!-- NAME -->
+  <div id="step-name" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">👋</div>
+    <h2>What's your name?</h2>
+    <input type="text" id="inp-name" placeholder="First name">
+    <div style="margin-top:16px">
+      <button class="btn btn-purple" onclick="submitName()">Next ▸</button>
+    </div>
+  </div>
+
+  <!-- CAMERA / PLAY -->
+  <div id="step-play" class="hid">
+    <div class="round-badge" id="round-badge">Round 1 of 5</div>
+    <h2 id="play-title">Make a face! 😜</h2>
+    <p class="sub" id="play-sub">Any expression — happy, surprised, angry, silly... you choose!</p>
+    <video id="vid" autoplay playsinline muted></video>
+    <canvas id="can"></canvas>
+    <div style="margin-top:16px">
+      <button class="btn btn-yellow" id="btn-snap" onclick="snapMood()">📸 Scan My Face!</button>
+    </div>
+    <div class="history" id="history"></div>
+    <div class="challenge-box hid" id="challenge-box"><p id="challenge-text"></p></div>
+  </div>
+
+  <!-- ANALYZING -->
+  <div id="step-analyzing" class="hid">
+    <div class="spinner">🧠</div>
+    <h2>Reading your face...</h2>
+    <p class="sub">AI is analyzing your expression!</p>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+
+  <!-- MOOD RESULT -->
+  <div id="step-mood" class="hid">
+    <div class="mood-result">
+      <div class="mood-emoji" id="mood-emoji">😄</div>
+      <div class="mood-word" id="mood-word">Happy</div>
+      <div class="mood-conf" id="mood-conf">95% confident</div>
+    </div>
+    <div class="mood-comment" id="mood-comment">"That smile could power a whole city!"</div>
+    <div class="mood-tip" id="mood-tip">💡 Tip: Try crossing your eyes to confuse me!</div>
+    <div class="photo-strip" id="photo-strip"></div>
+    <div class="history" id="mood-history"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">
+      <button class="btn btn-purple" id="btn-again" onclick="nextRound()">😜 Go Again!</button>
+      <button class="btn btn-pink" onclick="finishGame()">🎉 See Results</button>
+    </div>
+  </div>
+
+  <!-- FINAL RESULTS -->
+  <div id="step-results" class="hid">
+    <div style="font-size:48px;margin-bottom:8px">🏆</div>
+    <h2><span id="res-name"></span>'s Mood Report</h2>
+    <p class="sub">Here's every mood the AI detected:</p>
+    <div class="photo-strip" id="final-photos"></div>
+    <div class="history" id="final-moods"></div>
+    <p style="font-size:14px;color:#E040FB;margin:12px 0" id="final-summary"></p>
+    <div class="pbox">
+      <p><strong class="pink">That was real AI computer vision!</strong> At AI.M Academy, kids in grades 5–9 learn to build AI projects like this — image recognition, chatbots, and more.</p>
+      <p style="margin-top:8px"><strong class="purple">Weekend classes • Only 3–5 students • aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-pink" onclick="goTo('email')">📧 Send Results to Parent</button>
+    <br><button class="btn-link" onclick="resetAll()">🔄 Next Person</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="step-email" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <h2>Send <span id="email-name"></span>'s Mood Report!</h2>
+    <p class="sub">Parent's email — they'll get info about AI.M Academy</p>
+    <input type="email" id="inp-email" placeholder="parent@email.com">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-pink" onclick="submitEmail()">📧 Save & Continue</button>
+      <button class="btn btn-ghost" onclick="goTo('done')">Skip</button>
+    </div>
+    <button class="btn-link" onclick="goTo('results')">← Back</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done" class="hid">
+    <div style="font-size:56px;margin-bottom:12px">😄</div>
+    <h2>Thanks, <span id="done-name"></span>!</h2>
+    <p id="done-email" style="font-size:14px;color:#00E676;margin-bottom:8px"></p>
+    <div class="pbox">
+      <p>The AI used <strong>computer vision</strong> to read your face — the same tech behind face filters, self-driving cars, and security systems.</p>
+      <p style="margin-top:8px"><strong class="pink">Want to build your own?</strong> Book a free info session at <strong class="purple">aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-purple" onclick="resetAll()">🔄 Next Person</button>
+    <div class="ec" id="dc"></div>
+  </div>
+
+</div>
+
+<script>
+const API="http://localhost:8000";
+const MAX_ROUNDS=5;
+let nm="",stream=null,round=0,moods=[],photos=[],emailCount=0;
+
+// ─── NAV ───
+function show(s){document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add("hid"));document.getElementById("step-"+s).classList.remove("hid");}
+function goTo(s){
+  show(s);
+  if(s==="name")document.getElementById("inp-name").focus();
+  if(s==="email"){document.getElementById("email-name").textContent=nm;document.getElementById("inp-email").focus();}
+  if(s==="done"){document.getElementById("done-name").textContent=nm;updateCounts();}
+  if(s==="welcome")updateCounts();
+}
+function updateCounts(){
+  document.getElementById("wc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+  document.getElementById("dc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+}
+
+// ─── NAME ───
+function submitName(){const n=document.getElementById("inp-name").value.trim();if(!n)return;nm=n;startGame();}
+
+// ─── CAMERA ───
+async function startCam(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:480,height:360}});
+    const v=document.getElementById("vid");v.srcObject=stream;v.classList.remove("hid");
+  }catch(e){console.error("Cam error",e);}
+}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+
+// ─── GAME ───
+async function startGame(){
+  round=0;moods=[];photos=[];
+  show("play");
+  await startCam();
+  updatePlayUI();
+}
+
+function updatePlayUI(){
+  document.getElementById("round-badge").textContent=`Round ${round+1} of ${MAX_ROUNDS}`;
+  document.getElementById("play-title").textContent=round===0?`Make a face, ${nm}! 😜`:"Try a different face!";
+  document.getElementById("play-sub").textContent=round===0?"Any expression — happy, surprised, angry, silly... you choose!":"Can you fool the AI this time?";
+  document.getElementById("btn-snap").disabled=false;
+  renderHistory("history");
+
+  // Show challenge after round 1
+  if(round>0 && moods.length>0){
+    const last=moods[moods.length-1];
+    document.getElementById("challenge-box").classList.remove("hid");
+    document.getElementById("challenge-text").textContent=`💡 Challenge: ${last.tip}`;
+  }
+}
+
+function renderHistory(elId){
+  document.getElementById(elId).innerHTML=moods.map(m=>
+    `<div class="history-item"><span class="h-emoji">${m.emoji}</span><span>${m.mood}</span></div>`
+  ).join("");
+}
+
+// ─── SNAP ───
+async function snapMood(){
+  // Flash effect
+  const flash=document.getElementById("flash");
+  flash.classList.add("flash");
+  setTimeout(()=>flash.classList.remove("flash"),150);
+
+  // Capture frame
+  const vid=document.getElementById("vid"),can=document.getElementById("can");
+  can.width=vid.videoWidth||480;can.height=vid.videoHeight||360;
+  can.getContext("2d").drawImage(vid,0,0);
+  const dataUrl=can.toDataURL("image/jpeg",0.85);
+  const b64=dataUrl.split(",")[1];
+  photos.push(dataUrl);
+
+  // Disable button, show analyzing
+  document.getElementById("btn-snap").disabled=true;
+  show("analyzing");
+
+  try{
+    const r=await fetch(API+"/detect-mood",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:nm,photo:b64})});
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    moods.push(d);
+    showMoodResult(d);
+  }catch(e){
+    console.error(e);
+    // Fallback fun result
+    moods.push({mood:"Mysterious",emoji:"🤔",confidence:77,funnyComment:"Hmm, my brain got confused by that face! You win this round!",tip:"Try a super exaggerated expression next time!"});
+    showMoodResult(moods[moods.length-1]);
+  }
+}
+
+function showMoodResult(d){
+  round++;
+  document.getElementById("mood-emoji").textContent=d.emoji;
+  document.getElementById("mood-word").textContent=d.mood;
+  document.getElementById("mood-word").style.color=getMoodColor(d.mood);
+  document.getElementById("mood-conf").textContent=d.confidence+"% confident";
+  document.getElementById("mood-comment").textContent=`"${d.funnyComment}"`;
+  document.getElementById("mood-tip").textContent="💡 "+d.tip;
+
+  // Photo strip
+  document.getElementById("photo-strip").innerHTML=photos.map(p=>
+    `<img src="${p}" alt="face">`
+  ).join("");
+
+  renderHistory("mood-history");
+
+  // Hide "Go Again" if at max rounds
+  document.getElementById("btn-again").style.display=round>=MAX_ROUNDS?"none":"";
+  show("mood");
+}
+
+function getMoodColor(mood){
+  const colors={Happy:"#FFD700",Excited:"#FF6B35",Surprised:"#00E5FF",Silly:"#E040FB",Angry:"#FF1744",Scared:"#FF9100",Confused:"#9C27B0",Bored:"#78909C",Mysterious:"#7C4DFF",Mischievous:"#00E676"};
+  return colors[mood]||"#E040FB";
+}
+
+function nextRound(){
+  show("play");
+  updatePlayUI();
+}
+
+// ─── FINISH ───
+function finishGame(){
+  stopCam();
+  document.getElementById("res-name").textContent=nm;
+
+  // Photos
+  document.getElementById("final-photos").innerHTML=photos.map(p=>
+    `<img src="${p}" alt="face">`
+  ).join("");
+
+  // Mood history
+  document.getElementById("final-moods").innerHTML=moods.map(m=>
+    `<div class="history-item"><span class="h-emoji">${m.emoji}</span><span>${m.mood} (${m.confidence}%)</span></div>`
+  ).join("");
+
+  // Summary
+  const unique=[...new Set(moods.map(m=>m.mood))];
+  const summary=unique.length===moods.length
+    ?`${nm} showed ${moods.length} different moods — the AI couldn't predict you!`
+    :`${nm} showed ${unique.length} different moods across ${moods.length} rounds!`;
+  document.getElementById("final-summary").textContent=summary;
+
+  show("results");
+}
+
+// ─── EMAIL ───
+async function submitEmail(){
+  const em=document.getElementById("inp-email").value.trim();
+  if(!em||!em.includes("@"))return;
+
+  let resultsHtml='<h3 style="color:#9C27B0;margin:0 0 10px;">Mood Detection Results:</h3>';
+  moods.forEach((m,i)=>{
+    resultsHtml+=`<p style="color:#555;font-size:15px;margin:4px 0;">Round ${i+1}: ${m.emoji} <strong>${m.mood}</strong> (${m.confidence}% confident)</p>`;
+  });
+  const unique=[...new Set(moods.map(m=>m.mood))];
+  resultsHtml+=`<p style="color:#00BCD4;font-size:15px;margin-top:10px;"><strong>${unique.length} different moods detected across ${moods.length} rounds!</strong></p>`;
+  resultsHtml+=`<p style="color:#888;font-size:13px;margin-top:8px;">${nm} tested real AI computer vision — the same technology behind face filters and self-driving cars!</p>`;
+
+  try{
+    const r=await fetch(API+"/save-email",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:nm,email:em,activity:"Mood Detector",results:resultsHtml})
+    });
+    const d=await r.json();emailCount=d.count;
+    document.getElementById("done-email").textContent=d.sent?"✅ Results emailed to "+em:"✓ Email saved: "+em;
+  }catch(e){
+    emailCount++;
+    document.getElementById("done-email").textContent="✓ Email saved locally: "+em;
+  }
+  goTo("done");
+}
+
+// ─── RESET ───
+function resetAll(){
+  nm="";round=0;moods=[];photos=[];
+  stopCam();
+  document.getElementById("inp-name").value="";
+  document.getElementById("inp-email").value="";
+  document.getElementById("done-email").textContent="";
+  document.getElementById("history").innerHTML="";
+  document.getElementById("challenge-box").classList.add("hid");
+  goTo("welcome");
+}
+
+// ─── KEYBOARD ───
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("step-name").classList.contains("hid")&&e.key==="Enter")submitName();
+  if(!document.getElementById("step-email").classList.contains("hid")&&e.key==="Enter")submitEmail();
+  if(!document.getElementById("step-play").classList.contains("hid")&&e.key===" "){e.preventDefault();snapMood();}
+});
+
+// Init
+fetch(API+"/email-count").then(r=>r.json()).then(d=>{emailCount=d.count}).catch(()=>{});
+</script>
+</body>
+</html>

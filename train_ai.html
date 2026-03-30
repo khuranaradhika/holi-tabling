@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Train the AI — AI.M Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.4/dist/knn-classifier.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px;text-align:center;max-width:640px;width:100%}
+  h1{font-size:30px;margin-bottom:4px}
+  h2{font-size:22px;margin-bottom:10px}
+  .pink{color:#FF1493} .cyan{color:#00E5FF} .green{color:#00E676} .orange{color:#FF6B35} .gray{color:#888}
+  .sub{font-size:14px;color:#aaa;margin-bottom:20px}
+  .brand{font-size:18px;font-weight:bold;color:#FF1493;margin-bottom:14px}
+  input[type=text],input[type=email]{width:100%;padding:14px;font-size:18px;border-radius:12px;border:2px solid #FF1493;background:rgba(0,0,0,.3);color:#fff;text-align:center;outline:none}
+  input::placeholder{color:#666}
+  .btn{border:none;border-radius:14px;padding:14px 32px;font-size:16px;font-weight:bold;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .1s}
+  .btn:hover{transform:scale(1.03)}.btn:active{transform:scale(.97)}
+  .btn-pink{background:linear-gradient(135deg,#FF1493,#FF6B35)}
+  .btn-cyan{background:linear-gradient(135deg,#00BCD4,#00E5FF)}
+  .btn-green{background:linear-gradient(135deg,#00C853,#00E676)}
+  .btn-purple{background:linear-gradient(135deg,#9C27B0,#E040FB)}
+  .btn-ghost{background:transparent;color:#aaa;border:2px solid rgba(255,255,255,.2)}
+  .btn:disabled{opacity:.4;cursor:default;transform:none}
+  .btn-link{background:none;border:none;color:#666;cursor:pointer;font-size:13px;margin-top:10px}
+  video{width:100%;max-width:480px;border-radius:16px;border:3px solid #00E5FF;display:block;margin:0 auto;transform:scaleX(-1)}
+  .hid{display:none}
+  .pose-cards{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+  .pose-card{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:14px 18px;min-width:120px;transition:all .2s}
+  .pose-card.active{border-color:#00E5FF;background:rgba(0,229,255,.1);box-shadow:0 0 20px rgba(0,229,255,.2)}
+  .pose-card.done{border-color:#00E676;background:rgba(0,230,118,.1)}
+  .pose-card .emoji{font-size:36px;margin-bottom:6px}
+  .pose-card .name{font-size:13px;font-weight:bold;color:#fff}
+  .pose-card .status{font-size:11px;color:#888;margin-top:4px}
+  .progress-bar{width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin:12px 0}
+  .progress-fill{height:100%;border-radius:4px;transition:width .2s;background:linear-gradient(90deg,#00BCD4,#00E5FF)}
+  .predict-label{font-size:64px;margin:10px 0}
+  .predict-name{font-size:28px;font-weight:bold;margin-bottom:4px}
+  .confidence{font-size:16px;color:#00E5FF;margin-bottom:16px}
+  .score-board{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .score-item{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 14px;font-size:13px}
+  .pbox{background:rgba(255,20,147,.1);border:1px solid rgba(255,20,147,.3);border-radius:14px;padding:16px;margin:16px 0}
+  .pbox p{font-size:14px;color:#ccc;line-height:1.6}
+  .countdown{font-size:80px;font-weight:bold;color:#00E5FF;text-shadow:0 0 30px rgba(0,229,255,.5)}
+  .recording-pulse{animation:pulse 0.5s ease infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,0,.4)}50%{box-shadow:0 0 0 15px rgba(255,0,0,0)}}
+  .custom-input{display:flex;gap:8px;margin:12px 0;justify-content:center;align-items:center}
+  .custom-input input{max-width:180px;font-size:15px;padding:10px;text-align:center}
+  .custom-input select{padding:10px;font-size:20px;border-radius:8px;background:rgba(0,0,0,.3);color:#fff;border:2px solid #9C27B0;cursor:pointer}
+  .ec{margin-top:14px;font-size:12px;color:#555}
+</style>
+</head>
+<body>
+<div class="card" id="app">
+
+  <!-- LOADING -->
+  <div id="step-loading">
+    <div style="font-size:56px;margin-bottom:16px">🧠</div>
+    <h2>Loading AI Brain...</h2>
+    <p class="sub">Setting up TensorFlow.js + MobileNet</p>
+    <div class="progress-bar"><div class="progress-fill" id="load-bar" style="width:0%"></div></div>
+    <p class="gray" style="font-size:12px;margin-top:8px" id="load-status">Initializing...</p>
+  </div>
+
+  <!-- WELCOME -->
+  <div id="step-welcome" class="hid">
+    <div style="font-size:56px;margin-bottom:8px">🏋️</div>
+    <h1>Train the AI</h1>
+    <p style="font-size:22px;color:#00E5FF;margin-bottom:4px">in 20 Seconds!</p>
+    <p style="font-size:14px;color:#999;margin:4px 0">Powered by</p>
+    <div class="brand">AI.M Academy</div>
+    <p class="sub">Teach an AI to recognize YOUR moves.<br>You train it. You test it. You built it!</p>
+    <button class="btn btn-cyan" onclick="goTo('name')">Start Training ▸</button>
+    <div class="ec" id="wc"></div>
+  </div>
+
+  <!-- NAME -->
+  <div id="step-name" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">👋</div>
+    <h2>What's your name?</h2>
+    <input type="text" id="inp-name" placeholder="First name">
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan" onclick="submitName()">Next ▸</button>
+    </div>
+  </div>
+
+  <!-- PICK POSES -->
+  <div id="step-pick" class="hid">
+    <h2>Choose Your 3 Poses!</h2>
+    <p class="sub">2 preset poses + 1 YOU pick</p>
+    <div class="pose-cards">
+      <div class="pose-card done" style="border-color:#00E676">
+        <div class="emoji">🙌</div>
+        <div class="name">Hands Up</div>
+        <div class="status green">Preset ✓</div>
+      </div>
+      <div class="pose-card done" style="border-color:#00E676">
+        <div class="emoji">✌️</div>
+        <div class="name">Peace Sign</div>
+        <div class="status green">Preset ✓</div>
+      </div>
+      <div class="pose-card active">
+        <div class="emoji" id="custom-emoji-preview">🤔</div>
+        <div class="name">Your Choice!</div>
+        <div class="status cyan">Pick below</div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px">Pick your 3rd pose:</p>
+    <div class="custom-input">
+      <select id="custom-select" onchange="onCustomSelect()">
+        <option value="">— Choose —</option>
+        <option value="🦸|Superhero">🦸 Superhero Pose</option>
+        <option value="🥋|Karate Chop">🥋 Karate Chop</option>
+        <option value="🧘|Zen Mode">🧘 Zen Mode</option>
+        <option value="💪|Flex">💪 Flex / Strong</option>
+        <option value="🤘|Rock On">🤘 Rock On</option>
+        <option value="🫡|Salute">🫡 Salute</option>
+        <option value="custom">✏️ Type my own...</option>
+      </select>
+    </div>
+    <div id="custom-text-wrap" class="hid custom-input">
+      <input type="text" id="custom-text" placeholder="Type your pose name..." style="max-width:220px;font-size:14px;padding:10px;border-color:#9C27B0">
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan" id="btn-start-train" disabled onclick="startTraining()">Let's Train! ▸</button>
+    </div>
+  </div>
+
+  <!-- TRAIN POSE -->
+  <div id="step-train" class="hid">
+    <h2 id="train-title">Get ready!</h2>
+    <p class="sub" id="train-sub">Do the pose and hold it!</p>
+    <div id="train-countdown" class="countdown hid" style="margin:16px 0">3</div>
+    <video id="vid-train" autoplay playsinline muted class="hid"></video>
+    <div class="progress-bar" style="margin-top:12px"><div class="progress-fill" id="train-bar" style="width:0%;background:linear-gradient(90deg,#FF1493,#FF6B35)"></div></div>
+    <p id="train-status" style="font-size:13px;color:#888;margin-top:6px"></p>
+    <div class="pose-cards" id="train-dots"></div>
+  </div>
+
+  <!-- PREDICT -->
+  <div id="step-predict" class="hid">
+    <h2><span class="cyan">AI is LIVE!</span> Test it out!</h2>
+    <p class="sub">Do any of your 3 poses — the AI will guess!</p>
+    <video id="vid-predict" autoplay playsinline muted></video>
+    <div class="predict-label" id="pred-emoji">🤔</div>
+    <div class="predict-name" id="pred-name">Waiting...</div>
+    <div class="confidence" id="pred-conf"></div>
+    <div class="score-board" id="score-board"></div>
+    <p style="font-size:12px;color:#666;margin:8px 0" id="pred-count"></p>
+    <button class="btn btn-pink" onclick="finishPredict()" style="margin-top:10px">🎉 Finish & See Results</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="step-results" class="hid">
+    <div style="font-size:48px;margin-bottom:8px">🎉</div>
+    <h2><span id="res-name"></span> trained an AI!</h2>
+    <p class="sub">Here's how your AI performed:</p>
+    <div class="score-board" id="final-scores"></div>
+    <p style="font-size:14px;color:#00E5FF;margin:12px 0" id="accuracy-text"></p>
+    <div class="pbox">
+      <p><strong class="pink">You just did real machine learning!</strong> At AI.M Academy, kids in grades 5–9 build projects like this and way more — chatbots, image tools, recommendation systems.</p>
+      <p style="margin-top:8px"><strong class="cyan">Weekend classes • Only 3–5 students • aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-pink" onclick="goTo('email')">📧 Send Results to Parent</button>
+    <br>
+    <button class="btn-link" onclick="resetAll()">🔄 Next Person</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="step-email" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <h2>Send <span id="email-name"></span>'s Results!</h2>
+    <p class="sub">Parent's email — they'll get info about AI.M Academy</p>
+    <input type="email" id="inp-email" placeholder="parent@email.com">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-pink" onclick="submitEmail()">📧 Save & Continue</button>
+      <button class="btn btn-ghost" onclick="goTo('done')">Skip</button>
+    </div>
+    <button class="btn-link" onclick="goTo('results')">← Back</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done" class="hid">
+    <div style="font-size:56px;margin-bottom:12px">🧠</div>
+    <h2>Great job, <span id="done-name"></span>!</h2>
+    <p id="done-email" style="font-size:14px;color:#00E676;margin-bottom:8px"></p>
+    <div class="pbox">
+      <p>You just trained a real AI model using <strong>machine learning</strong> — the same technology behind self-driving cars, face filters, and voice assistants.</p>
+      <p style="margin-top:8px"><strong class="pink">Want to build more?</strong> Book a free info session at <strong class="cyan">aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-cyan" onclick="resetAll()">🔄 Next Person</button>
+    <div class="ec" id="dc"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ───
+let mobilenet, classifier, stream;
+let nm="", poses=[], predictions={}, totalPredictions=0, emailCount=0;
+const SERVER = "http://localhost:8000"; // same server as caricature booth
+
+// ─── INIT ───
+async function init(){
+  try{
+    document.getElementById("load-status").textContent="Loading TensorFlow.js...";
+    document.getElementById("load-bar").style.width="20%";
+    await tf.ready();
+
+    document.getElementById("load-status").textContent="Loading MobileNet (this takes a moment)...";
+    document.getElementById("load-bar").style.width="50%";
+    mobilenet = await window.mobilenet.load({version:2, alpha:1.0});
+
+    document.getElementById("load-status").textContent="Setting up classifier...";
+    document.getElementById("load-bar").style.width="90%";
+    classifier = knnClassifier.create();
+
+    document.getElementById("load-bar").style.width="100%";
+    document.getElementById("load-status").textContent="Ready!";
+    setTimeout(()=>show("welcome"),500);
+  }catch(e){
+    document.getElementById("load-status").textContent="Error: "+e.message+". Try refreshing.";
+    document.getElementById("load-bar").style.background="#FF1744";
+  }
+}
+init();
+
+// ─── NAV ───
+function show(s){
+  document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add("hid"));
+  document.getElementById("step-"+s).classList.remove("hid");
+}
+function goTo(s){
+  show(s);
+  if(s==="name")document.getElementById("inp-name").focus();
+  if(s==="email"){document.getElementById("email-name").textContent=nm;document.getElementById("inp-email").focus();}
+  if(s==="done"){document.getElementById("done-name").textContent=nm;document.getElementById("dc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";}
+  if(s==="welcome"){document.getElementById("wc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";}
+}
+
+// ─── NAME ───
+function submitName(){
+  const n=document.getElementById("inp-name").value.trim();
+  if(!n)return; nm=n; goTo("pick");
+}
+
+// ─── CUSTOM POSE PICK ───
+function onCustomSelect(){
+  const v=document.getElementById("custom-select").value;
+  if(v==="custom"){
+    document.getElementById("custom-text-wrap").classList.remove("hid");
+    document.getElementById("custom-text").focus();
+    document.getElementById("custom-emoji-preview").textContent="⭐";
+    checkPickReady();
+  }else if(v){
+    document.getElementById("custom-text-wrap").classList.add("hid");
+    const [emoji,name]=v.split("|");
+    document.getElementById("custom-emoji-preview").textContent=emoji;
+    document.getElementById("btn-start-train").disabled=false;
+  }else{
+    document.getElementById("custom-text-wrap").classList.add("hid");
+    document.getElementById("btn-start-train").disabled=true;
+  }
+}
+
+function guessEmoji(text){
+  const t=text.toLowerCase();
+  const map={
+    "dab":"🙆","wave":"👋","clap":"👏","punch":"👊","kick":"🦶","jump":"🦘",
+    "fly":"🦅","run":"🏃","swim":"🏊","dance":"💃","sing":"🎤","dab":"😎",
+    "push":"🫸","pull":"🫳","flex":"💪","strong":"💪","muscle":"💪",
+    "sleep":"😴","cry":"😢","laugh":"😂","smile":"😊","wink":"😉",
+    "pray":"🙏","hug":"🤗","point":"👆","peace":"✌️","ok":"👌",
+    "think":"🤔","shrug":"🤷","bow":"🙇","sit":"🪑","stand":"🧍",
+    "spin":"🔄","freeze":"🥶","robot":"🤖","alien":"👽","ninja":"🥷",
+    "pirate":"🏴‍☠️","king":"👑","queen":"👑","star":"⭐","heart":"❤️",
+    "fire":"🔥","lightning":"⚡","thunder":"⚡","magic":"✨","wizard":"🧙",
+    "sword":"⚔️","shield":"🛡️","fly":"✈️","rocket":"🚀","cool":"😎",
+    "scary":"😱","angry":"😤","surprised":"😲","silly":"🤪","crazy":"🤪",
+    "chicken":"🐔","cat":"🐱","dog":"🐶","snake":"🐍","bear":"🐻",
+    "t-rex":"🦖","dinosaur":"🦕","dragon":"🐉","monster":"👹",
+    "hands":"🤲","finger":"☝️","thumb":"👍","fist":"✊","high five":"🖐️",
+    "salute":"🫡","karate":"🥋","yoga":"🧘","meditat":"🧘","zen":"🧘",
+    "hero":"🦸","super":"🦸","power":"💥","rock":"🤘","metal":"🤘"
+  };
+  for(const[key,emoji] of Object.entries(map)){
+    if(t.includes(key))return emoji;
+  }
+  return "⭐";
+}
+
+function checkPickReady(){
+  const t=document.getElementById("custom-text").value.trim();
+  document.getElementById("btn-start-train").disabled=!t;
+  if(t)document.getElementById("custom-emoji-preview").textContent=guessEmoji(t);
+  else document.getElementById("custom-emoji-preview").textContent="⭐";
+}
+document.addEventListener("keyup",e=>{
+  if(document.getElementById("step-pick").classList.contains("hid"))return;
+  checkPickReady();
+});
+
+// ─── BUILD POSES ───
+function buildPoses(){
+  poses=[
+    {name:"Hands Up",emoji:"🙌"},
+          {name:"Peace Sign",emoji:"✌️"}
+  ];
+  const sel=document.getElementById("custom-select").value;
+  if(sel==="custom"){
+    const customName=document.getElementById("custom-text").value.trim()||"Custom Pose";
+    poses.push({
+      name:customName,
+      emoji:guessEmoji(customName)
+    });
+  }else{
+    const [emoji,name]=sel.split("|");
+    poses.push({name,emoji});
+  }
+}
+
+// ─── START CAMERA ───
+async function startCam(vidId){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:480,height:360}});
+    const v=document.getElementById(vidId);
+    v.srcObject=stream;v.classList.remove("hid");
+    return v;
+  }catch(e){console.error("Camera error",e);return null;}
+}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+
+// ─── TRAINING ───
+let currentPoseIdx=0, trainingSamples=0;
+
+async function startTraining(){
+  buildPoses();
+  predictions={};totalPredictions=0;
+  poses.forEach(p=>{predictions[p.name]=0;});
+  classifier.clearAllClasses();
+  currentPoseIdx=0;
+  show("train");
+  await startCam("vid-train");
+  trainNextPose();
+}
+
+function renderTrainDots(){
+  const el=document.getElementById("train-dots");
+  el.innerHTML=poses.map((p,i)=>{
+    let cls="pose-card";
+    if(i<currentPoseIdx)cls+=" done";
+    if(i===currentPoseIdx)cls+=" active";
+    return`<div class="${cls}"><div class="emoji">${p.emoji}</div><div class="name">${p.name}</div><div class="status">${i<currentPoseIdx?"✓ Done":i===currentPoseIdx?"Training...":"Waiting"}</div></div>`;
+  }).join("");
+}
+
+async function trainNextPose(){
+  if(currentPoseIdx>=poses.length){
+    finishTraining();
+    return;
+  }
+  const pose=poses[currentPoseIdx];
+  renderTrainDots();
+  document.getElementById("train-title").textContent=`Pose ${currentPoseIdx+1}: ${pose.emoji} ${pose.name}`;
+  document.getElementById("train-sub").textContent="Get ready... hold this pose!";
+  document.getElementById("train-bar").style.width="0%";
+  document.getElementById("train-status").textContent="";
+
+  // Countdown 3-2-1
+  const cd=document.getElementById("train-countdown");
+  cd.classList.remove("hid");
+  for(let i=3;i>=1;i--){
+    cd.textContent=i;
+    await wait(800);
+  }
+  cd.textContent="GO!";
+  await wait(400);
+  cd.classList.add("hid");
+
+  // Capture samples
+  document.getElementById("train-sub").textContent=`Hold your ${pose.name} pose!`;
+  document.getElementById("vid-train").classList.add("recording-pulse");
+  const vid=document.getElementById("vid-train");
+  const total=20;
+  for(let i=0;i<total;i++){
+    const activation=mobilenet.infer(vid,true);
+    classifier.addExample(activation,currentPoseIdx);
+    const pct=Math.round(((i+1)/total)*100);
+    document.getElementById("train-bar").style.width=pct+"%";
+    document.getElementById("train-status").textContent=`Capturing sample ${i+1}/${total}...`;
+    await wait(150);
+  }
+  document.getElementById("vid-train").classList.remove("recording-pulse");
+  document.getElementById("train-status").textContent=`✅ ${pose.name} learned!`;
+  await wait(600);
+  currentPoseIdx++;
+  trainNextPose();
+}
+
+function finishTraining(){
+  stopCam();
+  show("predict");
+  startPredicting();
+}
+
+// ─── PREDICTION ───
+let predicting=false;
+
+async function startPredicting(){
+  predicting=true;
+  const vid=await startCam("vid-predict");
+  if(!vid)return;
+  document.getElementById("vid-predict").classList.remove("hid");
+  updateScoreBoard();
+  predictLoop();
+}
+
+async function predictLoop(){
+  if(!predicting)return;
+  const vid=document.getElementById("vid-predict");
+  try{
+    if(classifier.getNumClasses()>0){
+      const activation=mobilenet.infer(vid,true);
+      const result=await classifier.predictClass(activation);
+      const idx=parseInt(result.label);
+      const pose=poses[idx];
+      const conf=Math.round(result.confidences[result.label]*100);
+
+      document.getElementById("pred-emoji").textContent=pose.emoji;
+      document.getElementById("pred-name").textContent=pose.name;
+      document.getElementById("pred-conf").textContent=conf+"% confident";
+
+      if(conf>70){
+        predictions[pose.name]=(predictions[pose.name]||0)+1;
+        totalPredictions++;
+        updateScoreBoard();
+      }
+    }
+  }catch(e){}
+  if(predicting)requestAnimationFrame(()=>setTimeout(predictLoop,100));
+}
+
+function updateScoreBoard(){
+  const el=document.getElementById("score-board");
+  el.innerHTML=poses.map(p=>{
+    const count=predictions[p.name]||0;
+    return`<div class="score-item">${p.emoji} ${p.name}: <strong>${count}</strong></div>`;
+  }).join("");
+  document.getElementById("pred-count").textContent=`Total detections: ${totalPredictions}`;
+}
+
+function finishPredict(){
+  predicting=false;
+  stopCam();
+  // Results
+  document.getElementById("res-name").textContent=nm;
+  const fs=document.getElementById("final-scores");
+  fs.innerHTML=poses.map(p=>{
+    const count=predictions[p.name]||0;
+    return`<div class="score-item">${p.emoji} ${p.name}: <strong>${count}</strong> detections</div>`;
+  }).join("");
+
+  const best=poses.reduce((a,p)=>(predictions[p.name]||0)>(predictions[a.name]||0)?p:a,poses[0]);
+  document.getElementById("accuracy-text").textContent=`Best recognized pose: ${best.emoji} ${best.name}!`;
+  show("results");
+}
+
+// ─── EMAIL (saves to server.py if running, otherwise just counts) ───
+async function submitEmail(){
+  const em=document.getElementById("inp-email").value.trim();
+  if(!em||!em.includes("@"))return;
+
+  // Build results HTML for the email
+  let resultsHtml='<h3 style="color:#9C27B0;margin:0 0 10px;">Training Results:</h3>';
+  poses.forEach(p=>{
+    const count=predictions[p.name]||0;
+    resultsHtml+=`<p style="color:#555;font-size:15px;margin:4px 0;">${p.emoji} <strong>${p.name}</strong>: ${count} detections</p>`;
+  });
+  const best=poses.reduce((a,p)=>(predictions[p.name]||0)>(predictions[a.name]||0)?p:a,poses[0]);
+  resultsHtml+=`<p style="color:#00BCD4;font-size:15px;margin-top:10px;"><strong>Best pose: ${best.emoji} ${best.name}!</strong></p>`;
+  resultsHtml+=`<p style="color:#888;font-size:13px;margin-top:8px;">${nm} trained a KNN classifier using MobileNet features — real machine learning!</p>`;
+
+  try{
+    const r=await fetch(SERVER+"/save-email",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:nm, email:em, activity:"Train the AI", results:resultsHtml})
+    });
+    const d=await r.json();
+    emailCount=d.count;
+    document.getElementById("done-email").textContent=d.sent?"✅ Results emailed to "+em:"✓ Email saved: "+em;
+  }catch(e){
+    emailCount++;
+    document.getElementById("done-email").textContent="✓ Email saved locally: "+em;
+  }
+  goTo("done");
+}
+
+// ─── RESET ───
+function resetAll(){
+  nm="";poses=[];predictions={};totalPredictions=0;currentPoseIdx=0;predicting=false;
+  classifier.clearAllClasses();
+  stopCam();
+  document.getElementById("inp-name").value="";
+  document.getElementById("inp-email").value="";
+  document.getElementById("custom-select").value="";
+  document.getElementById("custom-text").value="";
+  document.getElementById("custom-text-wrap").classList.add("hid");
+  document.getElementById("done-email").textContent="";
+  document.getElementById("btn-start-train").disabled=true;
+  goTo("welcome");
+}
+
+// ─── HELPERS ───
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("step-name").classList.contains("hid")&&e.key==="Enter")submitName();
+  if(!document.getElementById("step-email").classList.contains("hid")&&e.key==="Enter")submitEmail();
+});
+</script>
+</body>
+</html>

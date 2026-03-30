@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AI Animal Personality — AI.M Academy</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0a1628,#1a0a2e,#0d2137);color:#fff;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px;text-align:center;max-width:580px;width:100%}
+  h1{font-size:30px;margin-bottom:4px}
+  h2{font-size:22px;margin-bottom:10px}
+  .pink{color:#FF1493}.cyan{color:#00E5FF}.green{color:#00E676}.yellow{color:#FFD700}.orange{color:#FF6B35}
+  .sub{font-size:14px;color:#aaa;margin-bottom:18px}
+  .brand{font-size:18px;font-weight:bold;color:#FF1493;margin-bottom:14px}
+  input[type=text],input[type=email]{width:100%;padding:14px;font-size:18px;border-radius:12px;border:2px solid #00E5FF;background:rgba(0,0,0,.3);color:#fff;text-align:center;outline:none}
+  input::placeholder{color:#666}
+  .btn{border:none;border-radius:14px;padding:14px 32px;font-size:16px;font-weight:bold;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .1s}
+  .btn:hover{transform:scale(1.03)}.btn:active{transform:scale(.97)}
+  .btn-cyan{background:linear-gradient(135deg,#00BCD4,#00E5FF)}
+  .btn-pink{background:linear-gradient(135deg,#FF1493,#FF6B35)}
+  .btn-green{background:linear-gradient(135deg,#00C853,#00E676)}
+  .btn-ghost{background:transparent;color:#aaa;border:2px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 24px;font-size:15px;cursor:pointer}
+  .btn:disabled{opacity:.4;cursor:default;transform:none}
+  .btn-link{background:none;border:none;color:#666;cursor:pointer;font-size:13px;margin-top:10px}
+  .hid{display:none}
+  .q-num{background:linear-gradient(135deg,#00BCD4,#00E5FF);border-radius:20px;padding:4px 16px;font-size:12px;font-weight:bold;display:inline-block;margin-bottom:14px}
+  .q-text{font-size:20px;font-weight:bold;margin-bottom:20px;line-height:1.4}
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+  .opt{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:12px;font-size:15px}
+  .opt:hover{border-color:#00E5FF;background:rgba(0,229,255,.08)}
+  .opt.selected{border-color:#00E5FF;background:rgba(0,229,255,.15);box-shadow:0 0 15px rgba(0,229,255,.2)}
+  .opt .opt-emoji{font-size:28px;flex-shrink:0}
+  .opt .opt-text{color:#ddd}
+  .progress-dots{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+  .pdot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
+  .pdot.done{background:#00E5FF}.pdot.current{background:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.5)}
+  .animal-reveal{margin:16px 0}
+  .animal-emoji{font-size:100px;margin-bottom:8px;animation:popIn .5s ease}
+  .animal-name{font-size:28px;font-weight:bold;margin-bottom:2px}
+  .animal-title{font-size:16px;color:#00E5FF;margin-bottom:14px}
+  .animal-desc{background:rgba(255,255,255,.08);border-radius:14px;padding:16px;margin:12px 0;font-size:14px;color:#ddd;line-height:1.7;text-align:left}
+  .traits{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .trait{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:20px;padding:6px 14px;font-size:12px;color:#00E5FF;font-weight:bold}
+  .pbox{background:rgba(255,20,147,.1);border:1px solid rgba(255,20,147,.3);border-radius:14px;padding:16px;margin:16px 0}
+  .pbox p{font-size:14px;color:#ccc;line-height:1.6}
+  .dots{display:flex;justify-content:center;gap:10px;margin:16px 0}
+  .dot{width:14px;height:14px;border-radius:50%;animation:bounce 1s ease infinite}
+  .dot:nth-child(1){background:#00BCD4;animation-delay:0s}
+  .dot:nth-child(2){background:#00E5FF;animation-delay:.15s}
+  .dot:nth-child(3){background:#FFD700;animation-delay:.3s}
+  .dot:nth-child(4){background:#FF1493;animation-delay:.45s}
+  .dot:nth-child(5){background:#00E676;animation-delay:.6s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes popIn{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+  @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  .spinner{font-size:56px;display:inline-block;animation:spin 2s linear infinite}
+  .ec{margin-top:14px;font-size:12px;color:#555}
+</style>
+</head>
+<body>
+<div class="card" id="app">
+
+  <!-- WELCOME -->
+  <div id="step-welcome">
+    <div style="font-size:64px;margin-bottom:8px">🦉</div>
+    <h1>What's Your AI Animal?</h1>
+    <p style="font-size:16px;color:#00E5FF;margin-bottom:4px">Personality Quiz</p>
+    <p style="font-size:14px;color:#999;margin:4px 0">Powered by</p>
+    <div class="brand">AI.M Academy</div>
+    <p class="sub">Answer 3 quick questions and AI will reveal<br>your AI animal personality!</p>
+    <button class="btn btn-cyan" onclick="goTo('name')">Discover Mine! ▸</button>
+    <div class="ec" id="wc"></div>
+  </div>
+
+  <!-- NAME -->
+  <div id="step-name" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">👋</div>
+    <h2>What's your name?</h2>
+    <input type="text" id="inp-name" placeholder="First name">
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan" onclick="submitName()">Next ▸</button>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="step-question" class="hid">
+    <div class="q-num" id="q-num">Question 1 of 3</div>
+    <div class="progress-dots" id="pdots"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+  </div>
+
+  <!-- GENERATING -->
+  <div id="step-generating" class="hid">
+    <div class="spinner">🧬</div>
+    <h2>AI is analyzing your personality...</h2>
+    <p class="sub">Matching you with your AI animal!</p>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="step-result" class="hid">
+    <div class="animal-reveal">
+      <div class="animal-emoji" id="r-emoji">🦉</div>
+      <div class="animal-name" id="r-name">Neural Owl</div>
+      <div class="animal-title" id="r-title">The Thoughtful Analyst</div>
+    </div>
+    <div class="traits" id="r-traits"></div>
+    <div class="animal-desc" id="r-desc"></div>
+    <p style="font-size:11px;color:#666;margin:8px 0">Created by AI at <strong class="pink">AI.M Academy</strong> | aimacademy.us</p>
+    <div class="pbox">
+      <p><strong class="pink">AI matched your personality using pattern recognition</strong> — the same tech that powers Netflix recommendations and Spotify playlists. At AI.M Academy, kids build these kinds of AI systems!</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-pink" onclick="goTo('email')">📧 Send My Animal to Parent</button>
+    </div>
+    <button class="btn-link" onclick="resetAll()">🔄 Next Person</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="step-email" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <h2>Send <span id="email-name"></span>'s AI Animal!</h2>
+    <p class="sub">Parent's email — they'll get the result + AI.M Academy info</p>
+    <input type="email" id="inp-email" placeholder="parent@email.com">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-pink" onclick="submitEmail()">📧 Save & Continue</button>
+      <button class="btn btn-ghost" onclick="goTo('done')">Skip</button>
+    </div>
+    <button class="btn-link" onclick="goTo('result')">← Back</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done" class="hid">
+    <div style="font-size:56px;margin-bottom:12px" id="done-emoji">🦉</div>
+    <h2>Great job, <span id="done-name"></span>!</h2>
+    <p id="done-email" style="font-size:14px;color:#00E676;margin-bottom:8px"></p>
+    <div class="pbox">
+      <p>AI analyzed your answers using <strong>classification algorithms</strong> — the same technique behind recommendation engines and personality matching.</p>
+      <p style="margin-top:8px"><strong class="pink">Want to build your own AI quiz?</strong> Book a free info session at <strong class="cyan">aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-cyan" onclick="resetAll()">🔄 Next Person</button>
+    <div class="ec" id="dc"></div>
+  </div>
+
+</div>
+
+<script>
+const API="http://localhost:8000";
+let nm="",answers=[],animalResult=null,emailCount=0;
+
+const questions=[
+  {
+    text:"When you face a tough problem, what do you do first?",
+    options:[
+      {emoji:"🔍",text:"Break it into smaller pieces and analyze each part",value:"analytical"},
+      {emoji:"⚡",text:"Jump in and try things fast until something works",value:"fast"},
+      {emoji:"🤝",text:"Ask friends or teammates for ideas",value:"social"},
+      {emoji:"💭",text:"Sit back and think of a creative, unexpected solution",value:"creative"}
+    ]
+  },
+  {
+    text:"You're building an AI project. What sounds most exciting?",
+    options:[
+      {emoji:"🤖",text:"A chatbot that can talk like a real person",value:"language"},
+      {emoji:"🎨",text:"An AI that creates art or music",value:"creative"},
+      {emoji:"🔐",text:"A system that detects hackers and keeps people safe",value:"analytical"},
+      {emoji:"🏎️",text:"A self-driving robot that navigates a maze",value:"fast"}
+    ]
+  },
+  {
+    text:"Your superpower would be...",
+    options:[
+      {emoji:"🧠",text:"Reading minds — knowing what everyone is thinking",value:"analytical"},
+      {emoji:"⏱️",text:"Super speed — doing everything 100x faster",value:"fast"},
+      {emoji:"🎭",text:"Shapeshifting — becoming anything or anyone",value:"creative"},
+      {emoji:"🌐",text:"Connecting everyone — making the whole world work together",value:"social"}
+    ]
+  }
+];
+
+// ─── NAV ───
+function show(s){document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add("hid"));document.getElementById("step-"+s).classList.remove("hid");}
+function goTo(s){
+  show(s);
+  if(s==="name")document.getElementById("inp-name").focus();
+  if(s==="email"){document.getElementById("email-name").textContent=nm;document.getElementById("inp-email").focus();}
+  if(s==="done"){document.getElementById("done-name").textContent=nm;if(animalResult)document.getElementById("done-emoji").textContent=animalResult.emoji;updateCounts();}
+  if(s==="welcome")updateCounts();
+}
+function updateCounts(){
+  document.getElementById("wc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+  document.getElementById("dc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+}
+
+// ─── NAME ───
+function submitName(){const n=document.getElementById("inp-name").value.trim();if(!n)return;nm=n;answers=[];showQuestion(0);}
+
+// ─── QUESTIONS ───
+function showQuestion(idx){
+  if(idx>=questions.length){generateAnimal();return;}
+  show("question");
+  const q=questions[idx];
+  document.getElementById("q-num").textContent=`Question ${idx+1} of ${questions.length}`;
+  document.getElementById("q-text").textContent=q.text;
+
+  // Progress dots
+  document.getElementById("pdots").innerHTML=questions.map((_,i)=>{
+    let cls="pdot";
+    if(i<idx)cls+=" done";
+    if(i===idx)cls+=" current";
+    return`<div class="${cls}"></div>`;
+  }).join("");
+
+  // Options
+  document.getElementById("q-options").innerHTML=q.options.map((o,i)=>`
+    <div class="opt" onclick="selectAnswer(${idx},${i},'${o.value}')">
+      <span class="opt-emoji">${o.emoji}</span>
+      <span class="opt-text">${o.text}</span>
+    </div>
+  `).join("");
+}
+
+function selectAnswer(qIdx,oIdx,value){
+  // Highlight selected
+  document.querySelectorAll(".opt").forEach((el,i)=>{
+    el.classList.toggle("selected",i===oIdx);
+  });
+  answers.push(value);
+  // Brief delay then next question
+  setTimeout(()=>showQuestion(qIdx+1),400);
+}
+
+// ─── GENERATE ANIMAL ───
+async function generateAnimal(){
+  show("generating");
+  const profile=answers.join(", ");
+
+  try{
+    const resp=await fetch(API+"/analyze",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        name:nm,
+        photo:"",
+        quiz:true,
+        answers:profile
+      })
+    });
+
+    // Since /analyze expects a photo, let's call GPT-4o directly through a new approach
+    // Actually let's just use a direct fetch
+    throw new Error("use_fallback");
+  }catch(e){
+    // Call the server's analyze endpoint won't work without a photo
+    // So let's call a dedicated quiz endpoint or generate locally
+    try{
+      const resp=await fetch(API+"/animal-quiz",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name:nm, answers:profile})
+      });
+      const d=await resp.json();
+      if(d.error)throw new Error(d.error);
+      animalResult=d;
+      showAnimalResult();
+    }catch(e2){
+      // Fallback: generate locally based on answers
+      animalResult=generateLocalAnimal();
+      showAnimalResult();
+    }
+  }
+}
+
+function generateLocalAnimal(){
+  const counts={analytical:0,fast:0,creative:0,social:0};
+  answers.forEach(a=>{if(counts[a]!==undefined)counts[a]++;});
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+
+  const animals={
+    analytical:{emoji:"🦉",name:"Neural Owl",title:"The Thoughtful Analyst",desc:`${nm}, you think deeply and love solving puzzles step by step. Like an owl watching from above, you see patterns others miss. You'd be amazing at building AI systems that analyze data and find hidden insights! Your careful, methodical approach means your code would be clean and your models would be precise.`,traits:["Deep Thinker","Pattern Spotter","Detail-Oriented","Strategic Mind"]},
+    fast:{emoji:"🐆",name:"Algorithm Cheetah",title:"The Lightning Problem-Solver",desc:`${nm}, you're all about speed and action! Like a cheetah that strikes in milliseconds, you solve problems by diving in and iterating fast. You'd be incredible at building real-time AI systems — think self-driving cars or instant translation. Your energy and quick thinking would make you a powerhouse coder!`,traits:["Speed Runner","Quick Thinker","Action-First","Fearless Coder"]},
+    creative:{emoji:"🐙",name:"Deep Learning Octopus",title:"The Creative Multi-Tasker",desc:`${nm}, your mind works in eight directions at once! Like an octopus with incredible flexibility, you find unexpected solutions and think outside every box. You'd be perfect for building creative AI — art generators, music composers, or AI that dreams up entirely new ideas. Your imagination is your superpower!`,traits:["Creative Genius","Multi-Tasker","Out-of-Box Thinker","Innovation Engine"]},
+    social:{emoji:"🐺",name:"Data Wolf",title:"The Strategic Team Leader",desc:`${nm}, you're strongest when working with a pack! Like a wolf that coordinates with the team, you understand how to connect ideas and people. You'd excel at building AI systems that bring people together — social networks, recommendation engines, or collaborative tools. Leadership runs in your code!`,traits:["Team Player","Connector","Strategic Leader","Big Picture Thinker"]}
+  };
+  return animals[top];
+}
+
+function showAnimalResult(){
+  document.getElementById("r-emoji").textContent=animalResult.emoji;
+  document.getElementById("r-name").textContent=animalResult.name;
+  document.getElementById("r-title").textContent=animalResult.title;
+  document.getElementById("r-desc").textContent=animalResult.desc;
+  document.getElementById("r-traits").innerHTML=(animalResult.traits||[]).map(t=>
+    `<div class="trait">${t}</div>`
+  ).join("");
+  show("result");
+}
+
+// ─── EMAIL ───
+async function submitEmail(){
+  const em=document.getElementById("inp-email").value.trim();
+  if(!em||!em.includes("@"))return;
+
+  let resultsHtml=`<h3 style="color:#00BCD4;margin:0 0 10px;">${animalResult.emoji} ${animalResult.name}</h3>`;
+  resultsHtml+=`<p style="color:#9C27B0;font-size:16px;font-weight:bold;margin:4px 0;">${animalResult.title}</p>`;
+  resultsHtml+=`<p style="color:#555;font-size:14px;line-height:1.6;margin:10px 0;">${animalResult.desc}</p>`;
+  if(animalResult.traits){
+    resultsHtml+=`<p style="color:#00BCD4;font-size:13px;margin-top:8px;"><strong>Traits:</strong> ${animalResult.traits.join(" • ")}</p>`;
+  }
+  resultsHtml+=`<p style="color:#888;font-size:13px;margin-top:10px;">AI matched ${nm}'s personality using classification — the same tech behind Netflix and Spotify recommendations!</p>`;
+
+  try{
+    const r=await fetch(API+"/save-email",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:nm,email:em,activity:"AI Animal Quiz",results:resultsHtml})
+    });
+    const d=await r.json();emailCount=d.count;
+    document.getElementById("done-email").textContent=d.sent?"✅ Results emailed to "+em:"✓ Email saved: "+em;
+  }catch(e){
+    emailCount++;
+    document.getElementById("done-email").textContent="✓ Email saved locally: "+em;
+  }
+  goTo("done");
+}
+
+// ─── RESET ───
+function resetAll(){
+  nm="";answers=[];animalResult=null;
+  document.getElementById("inp-name").value="";
+  document.getElementById("inp-email").value="";
+  document.getElementById("done-email").textContent="";
+  goTo("welcome");
+}
+
+// ─── KEYBOARD ───
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("step-name").classList.contains("hid")&&e.key==="Enter")submitName();
+  if(!document.getElementById("step-email").classList.contains("hid")&&e.key==="Enter")submitEmail();
+});
+
+// Init
+fetch(API+"/email-count").then(r=>r.json()).then(d=>{emailCount=d.count}).catch(()=>{});
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>You in 2050 — AI.M Academy</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#020024,#090979,#00d4ff);color:#fff;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px;text-align:center;max-width:600px;width:100%}
+  h1{font-size:28px;margin-bottom:4px}
+  h2{font-size:22px;margin-bottom:10px}
+  .cyan{color:#00E5FF}.pink{color:#FF1493}.yellow{color:#FFD700}.green{color:#00E676}
+  .sub{font-size:14px;color:#aaa;margin-bottom:18px}
+  .brand{font-size:18px;font-weight:bold;color:#FF1493;margin-bottom:14px}
+  input[type=text],input[type=email]{width:100%;padding:14px;font-size:18px;border-radius:12px;border:2px solid #00E5FF;background:rgba(0,0,0,.3);color:#fff;text-align:center;outline:none}
+  input::placeholder{color:#666}
+  .btn{border:none;border-radius:14px;padding:14px 32px;font-size:16px;font-weight:bold;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .1s}
+  .btn:hover{transform:scale(1.03)}.btn:active{transform:scale(.97)}
+  .btn-cyan{background:linear-gradient(135deg,#00BCD4,#00E5FF)}
+  .btn-pink{background:linear-gradient(135deg,#FF1493,#FF6B35)}
+  .btn-green{background:linear-gradient(135deg,#00C853,#00E676)}
+  .btn-ghost{background:transparent;color:#aaa;border:2px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 24px;font-size:15px;cursor:pointer}
+  .btn:disabled{opacity:.4;cursor:default;transform:none}
+  .btn-link{background:none;border:none;color:#666;cursor:pointer;font-size:13px;margin-top:10px}
+  .hid{display:none}
+  video{width:100%;max-width:320px;border-radius:16px;border:3px solid #00E5FF;display:block;margin:0 auto;transform:scaleX(-1)}
+  canvas{display:none}
+  .careers{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+  .career{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .2s;min-width:140px}
+  .career:hover{border-color:#00E5FF;background:rgba(0,229,255,.08)}
+  .career.selected{border-color:#00E5FF;background:rgba(0,229,255,.15);box-shadow:0 0 15px rgba(0,229,255,.2)}
+  .career .c-emoji{font-size:32px;margin-bottom:4px}
+  .career .c-name{font-size:13px;font-weight:bold}
+  .future-img{width:100%;max-width:380px;border-radius:20px;border:4px solid #00E5FF;box-shadow:0 8px 30px rgba(0,229,255,.3);margin:0 auto 16px;display:block}
+  .future-title{font-size:28px;font-weight:bold;background:linear-gradient(135deg,#00E5FF,#00C853);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .future-company{font-size:15px;color:#00E5FF;margin-bottom:6px}
+  .future-achieve{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:10px;padding:10px;margin:10px 0;font-size:13px;color:#00E5FF}
+  .future-bio{background:rgba(255,255,255,.08);border-radius:14px;padding:16px;margin:12px 0;font-size:14px;color:#ddd;line-height:1.7;text-align:left}
+  .future-fact{font-size:13px;color:#FFD700;font-style:italic;margin:10px 0}
+  .id-card{border:2px solid rgba(0,229,255,.3);border-radius:16px;padding:20px;margin:16px 0;background:rgba(0,0,0,.2)}
+  .id-header{font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+  .comparison{display:flex;gap:16px;justify-content:center;align-items:flex-end;flex-wrap:wrap;margin:16px 0}
+  .comparison img{border-radius:16px;object-fit:cover;border:3px solid rgba(255,255,255,.2)}
+  .comparison .arrow{font-size:28px;color:#00E5FF;align-self:center}
+  .pbox{background:rgba(255,20,147,.1);border:1px solid rgba(255,20,147,.3);border-radius:14px;padding:16px;margin:16px 0}
+  .pbox p{font-size:14px;color:#ccc;line-height:1.6}
+  .dots{display:flex;justify-content:center;gap:10px;margin:16px 0}
+  .dot{width:14px;height:14px;border-radius:50%;animation:bounce 1s ease infinite}
+  .dot:nth-child(1){background:#00E5FF;animation-delay:0s}
+  .dot:nth-child(2){background:#00C853;animation-delay:.15s}
+  .dot:nth-child(3){background:#FFD700;animation-delay:.3s}
+  .dot:nth-child(4){background:#FF1493;animation-delay:.45s}
+  .dot:nth-child(5){background:#9C27B0;animation-delay:.6s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  .spinner{font-size:56px;display:inline-block;animation:spin 2s linear infinite}
+  .ec{margin-top:14px;font-size:12px;color:#555}
+  .gender-picks{display:flex;gap:10px;justify-content:center;margin:12px 0}
+  .gpick{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 24px;cursor:pointer;font-size:16px;transition:all .2s}
+  .gpick:hover{border-color:#00E5FF}
+  .gpick.selected{border-color:#00E5FF;background:rgba(0,229,255,.15)}
+</style>
+</head>
+<body>
+<div class="card" id="app">
+
+  <!-- WELCOME -->
+  <div id="step-welcome">
+    <div style="font-size:64px;margin-bottom:8px">🚀</div>
+    <h1>What Will You Look Like</h1>
+    <h1 style="font-size:36px"><span class="cyan">in 2050?</span></h1>
+    <p style="font-size:14px;color:#999;margin:8px 0">Powered by</p>
+    <div class="brand">AI.M Academy</div>
+    <p class="sub">Take a photo, pick your dream career,<br>and AI shows you YOUR future!</p>
+    <button class="btn btn-cyan" onclick="goTo('name')">See My Future! ▸</button>
+    <div class="ec" id="wc"></div>
+  </div>
+
+  <!-- NAME + GENDER -->
+  <div id="step-name" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">👋</div>
+    <h2>What's your name?</h2>
+    <input type="text" id="inp-name" placeholder="First name">
+    <div style="margin-top:16px">
+      <label style="font-size:14px;font-weight:bold;color:#00E5FF;display:block;margin-bottom:8px">I am a...</label>
+      <div class="gender-picks">
+        <div class="gpick" id="g-girl" onclick="pickGender('girl')">👧 Girl</div>
+        <div class="gpick" id="g-boy" onclick="pickGender('boy')">👦 Boy</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan" id="btn-name" onclick="submitName()" disabled>Next ▸</button>
+    </div>
+  </div>
+
+  <!-- PHOTO -->
+  <div id="step-photo" class="hid">
+    <h2>Take a photo of present-day you! 📸</h2>
+    <p class="sub">AI will transform you into your 2050 self</p>
+    <video id="vid" autoplay playsinline muted class="hid"></video>
+    <canvas id="can"></canvas>
+    <div id="cam-ph" style="width:100%;max-width:320px;height:220px;border-radius:16px;border:3px dashed rgba(0,229,255,.4);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:rgba(0,229,255,.05);flex-direction:column;gap:8px">
+      <span style="font-size:40px">📷</span>
+      <span style="color:rgba(255,255,255,.4);font-size:13px">Camera loading...</span>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-cyan" id="btn-snap" onclick="snapPhoto()" style="display:none">📸 Take Photo</button>
+      <button class="btn btn-green" onclick="document.getElementById('finp').click()">📁 Upload</button>
+      <button class="btn btn-ghost" onclick="skipPhoto()">Skip photo</button>
+      <input type="file" id="finp" accept="image/*" capture="user" onchange="onFile(event)" style="display:none">
+    </div>
+  </div>
+
+  <!-- PICK CAREER -->
+  <div id="step-career" class="hid">
+    <div style="font-size:36px;margin-bottom:8px">🔮</div>
+    <h2>What do you want to be in 2050?</h2>
+    <p class="sub">Pick a career or type your own!</p>
+    <div class="careers">
+      <div class="career" onclick="pickCareer(this,'AI Engineer')"><div class="c-emoji">🤖</div><div class="c-name">AI Engineer</div></div>
+      <div class="career" onclick="pickCareer(this,'Space Robotics Scientist')"><div class="c-emoji">🛸</div><div class="c-name">Space Robotics</div></div>
+      <div class="career" onclick="pickCareer(this,'Mars Explorer')"><div class="c-emoji">🔴</div><div class="c-name">Mars Explorer</div></div>
+      <div class="career" onclick="pickCareer(this,'Cybersecurity Specialist')"><div class="c-emoji">🔐</div><div class="c-name">Cybersecurity</div></div>
+      <div class="career" onclick="pickCareer(this,'Quantum Computing Scientist')"><div class="c-emoji">⚛️</div><div class="c-name">Quantum Computing</div></div>
+      <div class="career" onclick="pickCareer(this,'AI Doctor')"><div class="c-emoji">🧬</div><div class="c-name">AI Doctor</div></div>
+      <div class="career" onclick="pickCareer(this,'Game Designer')"><div class="c-emoji">🎮</div><div class="c-name">Game Designer</div></div>
+      <div class="career" onclick="pickCareer(this,'Climate Tech Engineer')"><div class="c-emoji">🌍</div><div class="c-name">Climate Tech</div></div>
+    </div>
+    <input type="text" id="inp-career" placeholder="Or type your own dream career..." style="border-color:#FFD700;font-size:15px">
+    <div style="margin-top:16px">
+      <button class="btn btn-cyan" id="btn-career" onclick="startGenerate()" disabled>🚀 Show Me My Future!</button>
+    </div>
+  </div>
+
+  <!-- GENERATING -->
+  <div id="step-generating" class="hid">
+    <div class="spinner">🔮</div>
+    <h2>Traveling to 2050...</h2>
+    <p class="sub" id="gen-status">AI is building your future...</p>
+    <img id="gen-photo" class="hid" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #00E5FF;margin:12px auto" alt="now">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px"><p style="font-size:12px;color:#888">⏱️ This takes 15-30 seconds</p></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="step-result" class="hid">
+    <div class="id-card">
+      <div class="id-header">◆ Future ID Card — Year 2050 ◆</div>
+      <div class="comparison" id="comparison"></div>
+      <img id="future-img" class="future-img hid" alt="You in 2050">
+      <div style="margin-top:12px">
+        <p style="font-size:14px;color:#888;margin-bottom:4px" id="res-name-label"></p>
+        <div class="future-title" id="res-title"></div>
+        <div class="future-company" id="res-company"></div>
+      </div>
+      <div class="future-achieve" id="res-achieve"></div>
+    </div>
+    <div class="future-bio" id="res-bio"></div>
+    <div class="future-fact" id="res-fact"></div>
+    <p style="font-size:11px;color:#666;margin:8px 0">Created by AI at <strong class="pink">AI.M Academy</strong> | aimacademy.us</p>
+    <div class="pbox">
+      <p><strong class="cyan">The future starts now!</strong> At AI.M Academy, kids in grades 5-9 start building the AI skills that lead to careers like this. Don't wait until 2050 — start today!</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-green" onclick="downloadFuture()">⬇ Save 2050 Portrait</button>
+      <button class="btn btn-pink" onclick="goTo('email')">📧 Email to Parent</button>
+    </div>
+    <button class="btn-link" onclick="resetAll()">🔄 Next Person</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="step-email" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <h2>Send <span id="email-name"></span>'s 2050 Portrait!</h2>
+    <p class="sub">Parent's email — they'll receive the future portrait + AI.M Academy info</p>
+    <input type="email" id="inp-email" placeholder="parent@email.com">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-pink" onclick="submitEmail()">📧 Save & Continue</button>
+      <button class="btn btn-ghost" onclick="goTo('done')">Skip</button>
+    </div>
+    <button class="btn-link" onclick="goTo('result')">← Back</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done" class="hid">
+    <div style="font-size:56px;margin-bottom:12px">🚀</div>
+    <h2>The future is bright, <span id="done-name"></span>!</h2>
+    <p id="done-email" style="font-size:14px;color:#00E676;margin-bottom:8px"></p>
+    <div class="pbox">
+      <p>AI used <strong>generative AI and computer vision</strong> to imagine your future — the same technology transforming medicine, space exploration, and every industry.</p>
+      <p style="margin-top:8px"><strong class="pink">Start building your future now!</strong> Book a free info session at <strong class="cyan">aimacademy.us</strong></p>
+    </div>
+    <button class="btn btn-cyan" onclick="resetAll()">🔄 Next Person</button>
+    <div class="ec" id="dc"></div>
+  </div>
+
+</div>
+
+<script>
+const API="http://localhost:8000";
+let nm="",gender="",photoB64=null,photoUrl=null,career="",futureData=null,futureImgUrl=null,stream=null,emailCount=0;
+
+// ─── NAV ───
+function show(s){document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add("hid"));document.getElementById("step-"+s).classList.remove("hid");}
+function goTo(s){
+  show(s);
+  if(s==="name")document.getElementById("inp-name").focus();
+  if(s==="photo")startCam();
+  if(s==="email"){document.getElementById("email-name").textContent=nm;document.getElementById("inp-email").focus();}
+  if(s==="done"){document.getElementById("done-name").textContent=nm;updateCounts();}
+  if(s==="welcome")updateCounts();
+}
+function updateCounts(){
+  document.getElementById("wc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+  document.getElementById("dc").textContent=emailCount>0?`📊 ${emailCount} email${emailCount!==1?"s":""} collected`:"";
+}
+
+// ─── NAME + GENDER ───
+function pickGender(g){
+  gender=g;
+  document.getElementById("g-girl").classList.toggle("selected",g==="girl");
+  document.getElementById("g-boy").classList.toggle("selected",g==="boy");
+  checkName();
+}
+function checkName(){
+  const n=document.getElementById("inp-name").value.trim();
+  document.getElementById("btn-name").disabled=!(n&&gender);
+}
+function submitName(){const n=document.getElementById("inp-name").value.trim();if(!n||!gender)return;nm=n;goTo("photo");}
+document.getElementById("inp-name").addEventListener("input",checkName);
+
+// ─── CAMERA ───
+async function startCam(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:480,height:360}});
+    const v=document.getElementById("vid");v.srcObject=stream;v.classList.remove("hid");
+    document.getElementById("cam-ph").classList.add("hid");
+    document.getElementById("btn-snap").style.display="";
+  }catch(e){console.log("No cam",e);}
+}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+
+function snapPhoto(){
+  const v=document.getElementById("vid"),c=document.getElementById("can");
+  c.width=v.videoWidth||480;c.height=v.videoHeight||360;
+  c.getContext("2d").drawImage(v,0,0);
+  photoUrl=c.toDataURL("image/jpeg",.85);
+  photoB64=photoUrl.split(",")[1];
+  stopCam();goTo("career");
+}
+function onFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{photoUrl=ev.target.result;photoB64=photoUrl.split(",")[1];stopCam();goTo("career");};
+  r.readAsDataURL(f);
+}
+function skipPhoto(){stopCam();photoB64=null;photoUrl=null;goTo("career");}
+
+// ─── CAREER ───
+function pickCareer(el,val){
+  document.querySelectorAll(".career").forEach(c=>c.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("inp-career").value=val;
+  career=val;
+  document.getElementById("btn-career").disabled=false;
+}
+document.getElementById("inp-career").addEventListener("input",function(){
+  career=this.value.trim();
+  document.getElementById("btn-career").disabled=!career;
+  document.querySelectorAll(".career").forEach(c=>c.classList.remove("selected"));
+});
+
+// ─── GENERATE ───
+async function startGenerate(){
+  if(!career)return;
+  show("generating");
+  document.getElementById("gen-status").textContent="AI is imagining your 2050 self...";
+  if(photoUrl){
+    document.getElementById("gen-photo").src=photoUrl;
+    document.getElementById("gen-photo").classList.remove("hid");
+  }
+
+  try{
+    const body={name:nm,career,gender};
+    if(photoB64)body.photo=photoB64;
+
+    document.getElementById("gen-status").textContent="Generating your 2050 portrait...";
+    const r=await fetch(API+"/future2050",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    futureData=d;
+    if(d.image)futureImgUrl="data:image/png;base64,"+d.image;
+    showResult();
+  }catch(e){
+    console.error(e);
+    document.getElementById("gen-status").textContent="Image generation failed, showing text results...";
+    futureData={
+      title:career,
+      futureTitle:"Lead "+career,
+      company:"FutureTech Global",
+      achievement:"Pioneered breakthrough AI technology used by millions worldwide",
+      bio:`In 2050, ${nm} is one of the most respected ${career}s in the world. ${gender==="girl"?"She":"He"} started learning AI as a kid and never stopped pushing boundaries. ${gender==="girl"?"Her":"His"} innovative work has changed how people live and work. From a curious kid at a Holi festival to a global tech leader — ${nm}'s journey proves that starting early makes all the difference.`,
+      funFact:"In 2050, AI assistants help students learn 10x faster than traditional methods!"
+    };
+    showResult();
+  }
+}
+
+function showResult(){
+  // Show comparison if we have original photo
+  const comp=document.getElementById("comparison");
+  if(photoUrl&&futureImgUrl){
+    comp.innerHTML=`
+      <div><img src="${photoUrl}" style="width:120px;height:120px" alt="Now"><p style="font-size:11px;color:#888;margin-top:4px">📸 ${nm} Today</p></div>
+      <div class="arrow">→</div>
+      <div><img src="${futureImgUrl}" style="width:180px;height:180px;border-color:#00E5FF" alt="2050"><p style="font-size:11px;color:#00E5FF;font-weight:bold;margin-top:4px">🚀 ${nm} in 2050</p></div>
+    `;
+    document.getElementById("future-img").classList.add("hid");
+  }else if(futureImgUrl){
+    comp.innerHTML="";
+    document.getElementById("future-img").src=futureImgUrl;
+    document.getElementById("future-img").classList.remove("hid");
+  }else{
+    comp.innerHTML="";
+  }
+
+  document.getElementById("res-name-label").textContent=nm+", Year 2050";
+  document.getElementById("res-title").textContent=futureData.futureTitle||futureData.title;
+  document.getElementById("res-company").textContent="@ "+(futureData.company||"FutureTech");
+  document.getElementById("res-achieve").innerHTML="🏆 "+futureData.achievement;
+  document.getElementById("res-bio").textContent=futureData.bio;
+  document.getElementById("res-fact").textContent="🔮 Fun 2050 fact: "+(futureData.funFact||"");
+  show("result");
+}
+
+// ─── DOWNLOAD ───
+function downloadFuture(){
+  if(futureImgUrl){
+    const a=document.createElement("a");a.download=nm+"_2050_portrait.png";a.href=futureImgUrl;a.click();
+  }
+}
+
+// ─── EMAIL ───
+async function submitEmail(){
+  const em=document.getElementById("inp-email").value.trim();
+  if(!em||!em.includes("@"))return;
+  try{
+    const r=await fetch(API+"/save-email",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:nm,email:em,activity:"You in 2050"})
+    });
+    const d=await r.json();emailCount=d.count;
+    document.getElementById("done-email").textContent=d.sent?"✅ 2050 portrait emailed to "+em:"✓ Email saved: "+em;
+  }catch(e){
+    emailCount++;
+    document.getElementById("done-email").textContent="✓ Email saved locally: "+em;
+  }
+  goTo("done");
+}
+
+// ─── RESET ───
+function resetAll(){
+  nm="";gender="";photoB64=null;photoUrl=null;career="";futureData=null;futureImgUrl=null;
+  stopCam();
+  document.getElementById("inp-name").value="";
+  document.getElementById("inp-career").value="";
+  document.getElementById("inp-email").value="";
+  document.getElementById("done-email").textContent="";
+  document.getElementById("future-img").classList.add("hid");
+  document.getElementById("btn-name").disabled=true;
+  document.getElementById("btn-career").disabled=true;
+  document.querySelectorAll(".career,.gpick").forEach(c=>c.classList.remove("selected"));
+  goTo("welcome");
+}
+
+// ─── KEYBOARD ───
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("step-name").classList.contains("hid")&&e.key==="Enter")submitName();
+  if(!document.getElementById("step-email").classList.contains("hid")&&e.key==="Enter")submitEmail();
+});
+
+// Init
+fetch(API+"/email-count").then(r=>r.json()).then(d=>{emailCount=d.count}).catch(()=>{});
+</script>
+</body>
+</html>

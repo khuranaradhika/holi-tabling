@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI.M Academy — Holi Caricature Booth</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#FF1493,#FF6B35,#FFD700,#00C853,#9C27B0);display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:rgba(255,255,255,.96);border-radius:24px;padding:36px;text-align:center;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  h1{font-size:32px;background:linear-gradient(135deg,#FF1493,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+  h2{font-size:24px;font-weight:bold;color:#333;margin-bottom:12px}
+  .sub{font-size:15px;color:#888;margin-bottom:20px}
+  .brand{font-size:20px;font-weight:bold;color:#FF1493;margin-bottom:16px}
+  input[type=text],input[type=email]{width:100%;padding:14px 20px;font-size:18px;border-radius:12px;border:3px solid #FF1493;outline:none;text-align:center}
+  .btn{border:none;border-radius:14px;padding:14px 36px;font-size:17px;font-weight:bold;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .1s}
+  .btn:hover{transform:scale(1.03)}.btn:active{transform:scale(.98)}
+  .btn-pink{background:linear-gradient(135deg,#FF1493,#FF6B35)}
+  .btn-purple{background:linear-gradient(135deg,#9C27B0,#2196F3)}
+  .btn-green{background:linear-gradient(135deg,#00C853,#2196F3)}
+  .btn:disabled{background:#ccc;cursor:default;transform:none}
+  .btn-ghost{background:transparent;color:#999;border:2px solid #e0e0e0;border-radius:14px;padding:12px 24px;font-size:15px;cursor:pointer}
+  .btn-link{background:none;border:none;color:#bbb;cursor:pointer;font-size:13px;margin-top:12px}
+  video{width:100%;max-width:420px;border-radius:16px;border:4px solid #FF1493;display:block;margin:0 auto}
+  .cam-ph{width:100%;max-width:420px;height:280px;border-radius:16px;border:4px dashed rgba(255,20,147,.4);margin:0 auto;display:flex;align-items:center;justify-content:center;background:#FFF0F5;flex-direction:column;gap:8px}
+  .cam-ph span{color:rgba(255,20,147,.6);font-size:14px}
+  .rimgs{display:flex;gap:16px;justify-content:center;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+  .rimgs img.orig{width:140px;height:140px;border-radius:16px;object-fit:cover;border:3px solid #e0e0e0}
+  .rimgs .arrow{font-size:28px;color:#FF1493;align-self:center}
+  .rimgs img.caric{width:260px;height:260px;border-radius:20px;object-fit:cover;border:4px solid #FF1493;box-shadow:0 8px 28px rgba(255,20,147,.3)}
+  .mbox{background:linear-gradient(135deg,#FFF0F5,#FFF8E1);border-radius:14px;padding:14px;margin-bottom:10px}
+  .mbox p{font-size:14px;color:#444;line-height:1.6}
+  .fbox{background:linear-gradient(135deg,#F3E5F5,#E8EAF6);border-radius:10px;padding:10px;margin-bottom:16px}
+  .fbox .lb{font-size:11px;font-weight:bold;color:#9C27B0;margin-bottom:3px}
+  .fbox p{font-size:12px;color:#666}
+  .pbox{background:linear-gradient(135deg,#FFF0F5,#F3E5F5);border-radius:14px;padding:18px;margin:12px 0 20px}
+  .pbox p{font-size:14px;color:#555;line-height:1.6}
+  .pbox .cta{font-size:15px;color:#9C27B0;font-weight:bold;margin-top:12px}
+  .ebox{background:#FFF0F0;border:1px solid rgba(255,23,68,.2);border-radius:10px;padding:12px;margin-bottom:12px}
+  .ebox p{color:#FF1744;font-size:13px}
+  .dots{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+  .dot{width:14px;height:14px;border-radius:50%;animation:bounce 1s ease infinite}
+  .dot:nth-child(1){background:#FF1493;animation-delay:0s}
+  .dot:nth-child(2){background:#FF6B35;animation-delay:.15s}
+  .dot:nth-child(3){background:#FFD700;animation-delay:.3s}
+  .dot:nth-child(4){background:#00C853;animation-delay:.45s}
+  .dot:nth-child(5){background:#9C27B0;animation-delay:.6s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  .spinner{font-size:56px;margin-bottom:16px;display:inline-block;animation:spin 2s linear infinite}
+  .ec{margin-top:16px;font-size:12px;color:#bbb}
+  .hid{display:none}
+  .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .simg{width:120px;height:120px;border-radius:16px;object-fit:cover;border:3px solid #FF1493;margin:12px 0}
+  .server-err{background:#FFF3E0;border:2px solid #FF9800;border-radius:14px;padding:20px;margin-bottom:20px}
+  .server-err p{color:#E65100;font-size:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card" id="app">
+
+  <!-- SERVER CHECK -->
+  <div id="step-check">
+    <div class="spinner">🔌</div>
+    <h2>Connecting to server...</h2>
+    <p class="sub">Make sure server.py is running</p>
+  </div>
+
+  <!-- SERVER DOWN -->
+  <div id="step-noserver" class="hid">
+    <div style="font-size:56px;margin-bottom:12px">⚠️</div>
+    <h2>Server Not Found</h2>
+    <div class="server-err">
+      <p>Can't connect to the booth server. Make sure you've run:</p>
+      <p style="font-family:monospace;background:#fff;padding:10px;border-radius:8px;margin:10px 0;font-size:15px;color:#333">python server.py</p>
+      <p>...and it says "✅ Now open booth.html in your browser"</p>
+    </div>
+    <button class="btn btn-pink" onclick="checkServer()">🔄 Try Again</button>
+  </div>
+
+  <!-- WELCOME -->
+  <div id="step-welcome" class="hid">
+    <div style="font-size:64px;margin-bottom:8px">🎨</div>
+    <h1>AI Holi Caricature</h1>
+    <p style="font-size:16px;color:#999;margin:4px 0">Powered by</p>
+    <div class="brand">AI.M Academy</div>
+    <p class="sub">Take a photo and watch AI transform you<br>into a Holi cartoon character!</p>
+    <button class="btn btn-pink" onclick="goTo('name')">Let's Go! ▸</button>
+    <div class="ec" id="wc"></div>
+  </div>
+
+  <!-- NAME -->
+  <div id="step-name" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">👋</div>
+    <h2>What's your name?</h2>
+    <input type="text" id="inp-name" placeholder="First name">
+    <div style="margin-top:20px">
+      <button class="btn btn-pink" onclick="submitName()">Next ▸</button>
+    </div>
+  </div>
+
+  <!-- CAPTURE -->
+  <div id="step-capture" class="hid">
+    <h2 id="cap-title">📸</h2>
+    <p class="sub">Strike your best Holi pose!</p>
+    <div id="err-box" class="ebox hid"><p id="err-msg"></p></div>
+    <div style="margin-bottom:20px">
+      <video id="vid" autoplay playsinline muted class="hid"></video>
+      <div id="cam-ph" class="cam-ph"><span style="font-size:40px">📷</span><span>Camera loading... or upload below</span></div>
+      <canvas id="can" class="hid"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <button class="btn btn-pink" id="snap-btn" onclick="snap()" style="display:none">📸 Take Photo</button>
+      <span style="color:#bbb;font-size:13px">or upload a photo:</span>
+      <button class="btn btn-purple" onclick="document.getElementById('finp').click()">📁 Upload Photo</button>
+      <input type="file" id="finp" accept="image/*" capture="user" onchange="onFile(event)" style="display:none">
+    </div>
+  </div>
+
+  <!-- PROCESSING -->
+  <div id="step-processing" class="hid">
+    <div class="spinner">🎨</div>
+    <h2 id="pt">Creating your caricature...</h2>
+    <p class="sub" id="ps">Analyzing photo with AI...</p>
+    <img id="pp" class="simg hid" alt="preview">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="background:#f8f8f8;border-radius:10px;padding:12px"><p style="font-size:12px;color:#999">⏱️ This usually takes 15–30 seconds</p></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="step-result" class="hid">
+    <h2 id="rt" style="background:linear-gradient(135deg,#FF1493,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent"></h2>
+    <p id="rn" style="font-size:20px;font-weight:bold;color:#333;margin-bottom:16px"></p>
+    <div class="rimgs">
+      <div><img id="ro" class="orig" alt="Original"><p style="font-size:11px;color:#bbb;margin-top:4px">📸 Original</p></div>
+      <div class="arrow">→</div>
+      <div><img id="rc" class="caric" alt="Caricature"><p style="font-size:11px;color:#FF1493;font-weight:bold;margin-top:4px">🎨 AI Caricature</p></div>
+    </div>
+    <div class="mbox"><p id="rm"></p></div>
+    <div class="fbox"><div class="lb">🤖 AI Fun Fact</div><p id="rf"></p></div>
+    <p style="font-size:11px;color:#bbb;margin-bottom:14px">Created with AI at <strong style="color:#FF1493">AI.M Academy</strong> | aimacademy.us</p>
+    <div class="acts">
+      <button class="btn btn-green" onclick="dlImg()">⬇ Save Caricature</button>
+      <button class="btn btn-pink" onclick="goTo('email')">📧 Email to Parent</button>
+    </div>
+    <button class="btn-link" onclick="reset()">🔄 Next Person</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="step-email" class="hid">
+    <div style="font-size:48px;margin-bottom:12px">📧</div>
+    <h2 id="et"></h2>
+    <p class="sub">Parent's email — they'll receive info about AI.M Academy</p>
+    <input type="email" id="inp-email" placeholder="parent@email.com">
+    <div class="acts" style="margin-top:20px">
+      <button class="btn btn-pink" onclick="submitEmail()">📧 Save & Continue</button>
+      <button class="btn-ghost" onclick="goTo('done')">Skip</button>
+    </div>
+    <button class="btn-link" onclick="goTo('result')">← Back to caricature</button>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done" class="hid">
+    <div style="font-size:56px;margin-bottom:12px">🎉</div>
+    <h2 id="dt"></h2>
+    <p id="de" style="font-size:14px;color:#00C853;margin-bottom:4px"></p>
+    <img id="dp" class="simg hid" alt="caricature">
+    <div class="pbox">
+      <p><strong style="color:#FF1493">Did you know?</strong> At AI.M Academy, kids in grades 5–9 learn to build AI projects just like this — chatbots, image tools, and more. Weekend classes, only 3–5 students.</p>
+      <div class="cta">Book a free info session → aimacademy.us</div>
+    </div>
+    <button class="btn btn-pink" onclick="reset()">🔄 Next Person</button>
+    <div class="ec" id="dc"></div>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:8000";
+let cur="check", nm="", photoB64=null, photoUrl=null, caricUrl=null, holi=null, strm=null, ec=0;
+
+// ─── SERVER CHECK ───
+async function checkServer(){
+  show("check");
+  try{
+    const r=await fetch(API+"/email-count");
+    const d=await r.json(); ec=d.count;
+    show("welcome"); updateCounts();
+  }catch(e){ show("noserver"); }
+}
+checkServer();
+
+// ─── NAV ───
+function show(s){
+  document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add("hid"));
+  document.getElementById("step-"+s).classList.remove("hid");
+  cur=s;
+}
+
+function goTo(s){
+  show(s);
+  if(s==="name") document.getElementById("inp-name").focus();
+  if(s==="capture"){ document.getElementById("cap-title").textContent=`Hey ${nm}! 📸`; startCam(); }
+  if(s==="email"){ document.getElementById("et").textContent=`Send ${nm}'s Caricature!`; document.getElementById("inp-email").focus(); }
+  if(s==="done"){
+    document.getElementById("dt").textContent=`Happy Holi, ${nm}!`;
+    if(caricUrl){document.getElementById("dp").src=caricUrl;document.getElementById("dp").classList.remove("hid");}
+    updateCounts();
+  }
+  if(s==="welcome") updateCounts();
+}
+
+function updateCounts(){
+  document.getElementById("wc").textContent=ec>0?`📊 ${ec} email${ec!==1?"s":""} collected this session`:"";
+  document.getElementById("dc").textContent=`📊 ${ec} email${ec!==1?"s":""} collected this session`;
+}
+
+// ─── NAME ───
+function submitName(){
+  const n=document.getElementById("inp-name").value.trim();
+  if(!n)return; nm=n; goTo("capture");
+}
+
+// ─── CAMERA ───
+async function startCam(){
+  try{
+    strm=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480}});
+    const v=document.getElementById("vid");
+    v.srcObject=strm; v.classList.remove("hid");
+    document.getElementById("cam-ph").classList.add("hid");
+    document.getElementById("snap-btn").style.display="";
+  }catch(e){console.log("No cam",e)}
+}
+function stopCam(){if(strm){strm.getTracks().forEach(t=>t.stop());strm=null;}}
+
+function snap(){
+  const v=document.getElementById("vid"),c=document.getElementById("can");
+  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+  c.getContext("2d").drawImage(v,0,0);
+  photoUrl=c.toDataURL("image/jpeg",.85); photoB64=photoUrl.split(",")[1];
+  stopCam(); process();
+}
+
+function onFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{photoUrl=ev.target.result;photoB64=photoUrl.split(",")[1];stopCam();process();};
+  r.readAsDataURL(f);
+}
+
+// ─── PROCESS ───
+async function process(){
+  show("processing");
+  document.getElementById("pt").textContent=`Creating ${nm}'s caricature...`;
+  document.getElementById("pp").src=photoUrl;
+  document.getElementById("pp").classList.remove("hid");
+
+  try{
+    // Step 1: Claude
+    document.getElementById("ps").textContent="Creating your Holi profile...";
+    const a=await fetch(API+"/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:nm,photo:photoB64})});
+    const ad=await a.json(); if(ad.error)throw new Error(ad.error); holi=ad;
+
+    // Step 2: OpenAI caricature
+    document.getElementById("ps").textContent="Generating your Holi caricature... (15-30 sec)";
+    const c=await fetch(API+"/caricature",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({photo:photoB64,name:nm})});
+    const cd=await c.json(); if(cd.error)throw new Error(cd.error);
+    caricUrl="data:image/png;base64,"+cd.image;
+
+    // Show result
+    document.getElementById("rt").textContent=holi?.holiTitle||"Holi Star!";
+    document.getElementById("rn").textContent=nm;
+    document.getElementById("ro").src=photoUrl;
+    document.getElementById("rc").src=caricUrl;
+    document.getElementById("rm").textContent=holi?.holiMessage||"";
+    document.getElementById("rf").textContent=holi?.funFact||"";
+    goTo("result");
+  }catch(e){
+    console.error(e);
+    document.getElementById("err-box").classList.remove("hid");
+    document.getElementById("err-msg").textContent="Error: "+e.message+". Try again.";
+    goTo("capture");
+  }
+}
+
+// ─── DOWNLOAD ───
+function dlImg(){
+  if(!caricUrl)return;
+  const a=document.createElement("a");a.download=nm+"_holi_caricature.png";a.href=caricUrl;a.click();
+}
+
+// ─── EMAIL ───
+async function submitEmail(){
+  const em=document.getElementById("inp-email").value.trim();
+  if(!em||!em.includes("@"))return;
+  const btn=document.querySelector('#step-email .btn-pink');
+  btn.textContent="📧 Sending...";btn.disabled=true;
+  try{
+    const r=await fetch(API+"/save-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:nm,email:em})});
+    const d=await r.json();ec=d.count;
+    document.getElementById("de").textContent=d.sent?"✅ Caricature emailed to "+em:"✓ Email saved: "+em;
+  }catch(e){ec++;document.getElementById("de").textContent="✓ Email saved: "+em;}
+  btn.textContent="📧 Save & Continue";btn.disabled=false;
+  goTo("done");
+}
+
+// ─── RESET ───
+function reset(){
+  nm="";photoB64=null;photoUrl=null;caricUrl=null;holi=null;
+  document.getElementById("inp-name").value="";
+  document.getElementById("inp-email").value="";
+  document.getElementById("err-box").classList.add("hid");
+  document.getElementById("vid").classList.add("hid");
+  document.getElementById("cam-ph").classList.remove("hid");
+  document.getElementById("snap-btn").style.display="none";
+  document.getElementById("de").textContent="";
+  goTo("welcome");
+}
+
+// Keyboard shortcuts
+document.addEventListener("keydown",e=>{
+  if(cur==="name"&&e.key==="Enter")submitName();
+  if(cur==="email"&&e.key==="Enter")submitEmail();
+});
+</script>
+</body>
+</html>
